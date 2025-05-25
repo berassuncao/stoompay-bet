@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Stoompay Bet - Cassino Virtual</title>
+<style>
+  /* Reset básico */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, sans-serif;
+    background: #e7e7e7;
+    color: #222;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header, footer {
+    background: #4caf50;
+    color: white;
+    text-align: center;
+    padding: 15px 20px;
+    font-weight: bold;
+    font-size: 1.5rem;
+  }
+
+  main {
+    flex-grow: 1;
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 10px 20px 40px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.15);
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  /* Tela inicial e login */
+  #welcomeScreen, #loginScreen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 70vh;
+    gap: 25px;
+  }
+
+  #welcomeScreen button, #loginScreen button {
+    background: #4caf50;
+    border: none;
+    padding: 15px 40px;
+    color: white;
+    font-size: 1.25rem;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+  }
+
+  #welcomeScreen button:hover, #loginScreen button:hover {
+    background: #3b8b3b;
+  }
+
+  #loginScreen input[type=text] {
+    font-size: 1.1rem;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1.5px solid #ccc;
+    width: 280px;
+  }
+
+  #loginScreen label {
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+
+  /* Cassino */
+  #casinoScreen {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  #userInfo {
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  #userInfo span {
+    background: #d5f0d5;
+    padding: 6px 15px;
+    border-radius: 12px;
+    font-weight: 600;
+  }
+
+  /* Botões topo */
+  #topControls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-bottom: 15px;
+  }
+
+  #topControls button, #topControls label {
+    cursor: pointer;
+    background: #4caf50;
+    border: none;
+    color: white;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    user-select: none;
+    transition: background 0.3s ease;
+  }
+
+  #topControls button:hover, #topControls label:hover {
+    background: #3b8b3b;
+  }
+
+  #topControls input[type=checkbox] {
+    display: none;
+  }
+
+  #topControls label[for="toggleDark"] {
+    background: #222;
+  }
+
+  /* Área dos jogos */
+  .games {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: center;
+  }
+
+  .game {
+    border: 2px solid #4caf50;
+    border-radius: 15px;
+    padding: 20px;
+    width: 280px;
+    background: #f8fff8;
+    box-shadow: 0 0 10px rgba(76,175,80,0.25);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .game h3 {
+    margin-bottom: 15px;
+    color: #2e7d32;
+    font-weight: 700;
+    font-size: 1.3rem;
+  }
+
+  .game canvas {
+    background: white;
+    border-radius: 12px;
+    border: 2px solid #4caf50;
+    margin-bottom: 15px;
+  }
+
+  .game input[type=number] {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1.5px solid #ccc;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+  }
+
+  .game button {
+    background: #4caf50;
+    border: none;
+    color: white;
+    font-size: 1.1rem;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    width: 100%;
+    transition: background 0.3s ease;
+  }
+
+  .game button:hover {
+    background: #3b8b3b;
+  }
+
+  .resultText {
+    font-weight: 700;
+    margin-top: 10px;
+    min-height: 26px;
+    text-align: center;
+    color: #1b5e20;
+  }
+
+  /* Modo escuro */
+  body.dark-mode {
+    background: #121212;
+    color: #eee;
+  }
+  body.dark-mode main {
+    background: #222;
+    box-shadow: 0 0 15px rgba(255,255,255,0.05);
+  }
+  body.dark-mode header, body.dark-mode footer {
+    background: #0b6623;
+  }
+  body.dark-mode #userInfo span {
+    background: #2c6a2c;
+  }
+  body.dark-mode .game {
+    background: #1b381b;
+    border-color: #2e7d32;
+    box-shadow: 0 0 15px rgba(76,175,80,0.8);
+  }
+  body.dark-mode .game button, body.dark-mode #topControls button, body.dark-mode #topControls label {
+    background: #2e7d32;
+  }
+  body.dark-mode .game button:hover, body.dark-mode #topControls button:hover, body.dark-mode #topControls label:hover {
+    background: #4caf50;
+  }
+  body.dark-mode .game canvas {
+    background: #2a2a2a;
+  }
+
+  /* Fundo animado suave */
+  .bg-effect {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at center, #4caf50a0, transparent 70%);
+    animation: pulse 6s infinite alternate ease-in-out;
+    z-index: -1;
+  }
+  @keyframes pulse {
+    0% { filter: brightness(1); }
+    100% { filter: brightness(1.4); }
+  }
+
+  /* Audio controls */
+  #audioControls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+  }
+  #audioControls button {
+    padding: 6px 15px;
+    font-weight: 700;
+  }
+
+  /* Responsividade */
+  @media (max-width: 940px) {
+    .games {
+      flex-direction: column;
+      align-items: center;
+    }
+    .game {
+      width: 90%;
+      max-width: 400px;
+    }
+    #loginScreen input[type=text] {
+      width: 90vw;
+      max-width: 320px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>Stoompay Bet - Cassino Virtual</header>
+
+<main>
+  <!-- Tela de boas vindas -->
+  <section id="welcomeScreen">
+    <h1>Bem-vindo ao Stoompay Bet!</h1>
+    <button id="btnEnter">Entrar no Cassino</button>
+  </section>
+
+  <!-- Tela de login -->
+  <section id="loginScreen" class="hidden">
+    <label for="usernameInput">Digite seu username para jogar:</label>
+    <input type="text" id="usernameInput" placeholder="Seu nome de jogador" maxlength="15" />
+    <button id="btnLogin">Entrar</button>
+  </section>
+
+  <!-- Tela cassino -->
+  <section id="casinoScreen" class="hidden">
+
+    <div id="userInfo">
+      Jogador: <span id="displayUser"></span>
+      Saldo: <span id="displayBalance">0</span> stoomCoins
+    </div>
+
+    <div id="topControls">
+      <button id="btnToggleMusic">🎵 Música: ON</button>
+      <label for="toggleDark" title="Modo Claro/Escuro">🌙</label>
+      <input type="checkbox" id="toggleDark" />
+      <label for="toggleBg" title="Efeito Fundo">✨</label>
+      <input type="checkbox" id="toggleBg" />
+    </div>
+
+    <div class="games">
+
+      <!-- Jogo Crash -->
+      <div class="game" id="crashGame">
+        <h3>Jogo Crash</h3>
+        <canvas id="crashCanvas" width="260" height="180"></canvas>
+        <input type="number" id="crashBet" min="1" placeholder="Aposta (mín 1)" />
+        <button id="btnCrashPlay">Jogar Crash</button>
+        <div class="resultText" id="crashResult"></div>
+      </div>
+
+      <!-- Jogo Roleta -->
+      <div class="game" id="rouletteGame">
+        <h3>Jogo Roleta</h3>
+        <canvas id="rouletteCanvas" width="260" height="260"></canvas>
+        <input type="number" id="rouletteBet" min="1" placeholder="Aposta (mín 1)" />
+        <input type="number" id="rouletteNumber" min="0" max="36" placeholder="Número (0 a 36)" />
+        <button id="btnRoulettePlay">Jogar Roleta</button>
+        <div class="resultText" id="rouletteResult"></div>
+      </div>
+
+      <!-- Jogo Slots -->
+      <div class="game" id="slotsGame">
+        <h3>Jogo Slots</h3>
+        <canvas id="slotsCanvas" width="260" height="100"></canvas>
+        <input type="number" id="slotsBet" min="1" placeholder="Aposta (mín 1)" />
+        <button id="btnSlotsPlay">Jogar Slots</button>
+        <div class="resultText" id="slotsResult"></div>
+      </div>
+
+    </div>
+
+  </section>
+</main>
+
+<footer>© 2025 Stoompay Bet - Cassino Virtual - Jogue Responsavelmente</footer>
+
+<div class="bg-effect hidden" id="bgEffect"></div>
+
+<audio id="bgMusic" loop preload="auto" src="https://cdn.pixabay.com/download/audio/2021/10/14/audio_8d4f43b7fc.mp3?filename=chill-guitar-ambient-7602.mp3"></audio>
+
+<script>
+(() => {
+  const welcomeScreen = document.getElementById('welcomeScreen');
+  const loginScreen = document.getElementById('loginScreen');
+  const casinoScreen = document.getElementById('casinoScreen');
+  const btnEnter = document.getElementById('btnEnter');
+  const btnLogin = document.getElementById('btnLogin');
+  const usernameInput = document.getElementById('usernameInput');
+  const displayUser = document.getElementById('displayUser');
+  const displayBalance = document.getElementById('displayBalance');
+
+  const toggleDark = document.getElementById('toggleDark');
+  const toggleBg = document.getElementById('toggleBg');
+  const bgEffect = document.getElementById('bgEffect');
+
+  const btnToggleMusic = document.getElementById('btnToggleMusic');
+  const bgMusic = document.getElementById('bgMusic');
+
+  let username = '';
+  let balance = 1000;
+
+  // Mostrar tela login ao clicar entrar
+  btnEnter.onclick = () => {
+    welcomeScreen.classList.add('hidden');
+    loginScreen.classList.remove('hidden');
+    usernameInput.focus();
+  };
+
+  // Login usuário
+  btnLogin.onclick = () => {
+    const val = usernameInput.value.trim();
+    if(val.length < 3) {
+      alert('Digite um username com ao menos 3 caracteres.');
+      usernameInput.focus();
+      return;
+    }
+    username = val;
+    displayUser.textContent = username;
+    displayBalance.textContent = balance.toFixed(2);
+    loginScreen.classList.add('hidden');
+    casinoScreen.classList.remove('hidden');
+  };
+
+  // Modo claro/escuro
+  toggleDark.onchange = () => {
+    document.body.classList.toggle('dark-mode', toggleDark.checked);
+  };
+
+  // Efeito fundo
+  toggleBg.onchange = () => {
+    bgEffect.classList.toggle('hidden', !toggleBg.checked);
+  };
+
+  // Música de fundo on/off
+  let musicOn = false;
+  btnToggleMusic.onclick = () => {
+    if(musicOn) {
+      bgMusic.pause();
+      btnToggleMusic.textContent = '🎵 Música: OFF';
+      musicOn = false;
+    } else {
+      bgMusic.volume = 0.12;
+      bgMusic.play();
+      btnToggleMusic.textContent = '🎵 Música: ON';
+      musicOn = true;
+    }
+  };
+
+  // Atualiza saldo na tela
+  function updateBalance() {
+    displayBalance.textContent = balance.toFixed(2);
+  }
+
+  /*** JOGO CRASH ***/
+  const crashCanvas = document.getElementById('crashCanvas');
+  const crashCtx = crashCanvas.getContext('2d');
+  const crashBetInput = document.getElementById('crashBet');
+  const btnCrashPlay = document.getElementById('btnCrashPlay');
+  const crashResult = document.getElementById('crashResult');
+
+  // Variáveis crash
+  let crashAnimating = false;
+  let currentMultiplier = 1;
+  let crashPoint = 0;
+
+  btnCrashPlay.onclick = () => {
+    if(crashAnimating) return;
+
+    let bet = parseFloat(crashBetInput.value);
+    if(isNaN(bet) || bet < 1) {
+      alert('Aposta inválida!');
+      return;
+    }
+    if(bet > balance) {
+      alert('Saldo insuficiente!');
+      return;
+    }
+
+    balance -= bet;
+    updateBalance();
+
+    crashResult.textContent = 'Jogo em andamento...';
+    crashAnimating = true;
+    currentMultiplier = 1;
+    crashPoint = (Math.random() * 5) + 1.2; // Crash entre 1.2x e 6.2x
+
+    let lastTime = null;
+
+    function animateCrash(time) {
+      if(!lastTime) lastTime = time;
+      const dt = (time - lastTime) / 1000;
+      lastTime = time;
+
+      // Cresce multiplicador exponencialmente
+      currentMultiplier += dt * currentMultiplier * 0.5; 
+
+      // Desenha fundo
+      crashCtx.clearRect(0,0,crashCanvas.width, crashCanvas.height);
+
+      // Texto multiplicador
+      crashCtx.font = 'bold 48px Arial';
+      crashCtx.fillStyle = '#2e7d32';
+      crashCtx.textAlign = 'center';
+      crashCtx.fillText(currentMultiplier.toFixed(2) + 'x', crashCanvas.width/2, crashCanvas.height/2 + 15);
+
+      if(currentMultiplier >= crashPoint) {
+        crashAnimating = false;
+        crashResult.textContent = `Crash em ${crashPoint.toFixed(2)}x! Você perdeu.`;
+        return;
+      }
+
+      requestAnimationFrame(animateCrash);
+    }
+
+    // Simula o jogador estourar a aposta em 3s (demo)
+    setTimeout(() => {
+      if(!crashAnimating) return;
+
+      crashAnimating = false;
+      const winMultiplier = Math.min(currentMultiplier, crashPoint);
+      if(winMultiplier < crashPoint) {
+        const winAmount = bet * winMultiplier;
+        balance += winAmount;
+        updateBalance();
+        crashResult.textContent = `Você parou em ${winMultiplier.toFixed(2)}x! Ganhou ${winAmount.toFixed(2)} stoomCoins!`;
+      } else {
+        crashResult.textContent = `Crash em ${crashPoint.toFixed(2)}x! Você perdeu.`;
+      }
+    }, 3000);
+
+    requestAnimationFrame(animateCrash);
+  };
+
+  /*** JOGO ROLETTE ***/
+  const rouletteCanvas = document.getElementById('rouletteCanvas');
+  const rouletteCtx = rouletteCanvas.getContext('2d');
+  const rouletteBetInput = document.getElementById('rouletteBet');
+  const rouletteNumberInput = document.getElementById('rouletteNumber');
+  const btnRoulettePlay = document.getElementById('btnRoulettePlay');
+  const rouletteResult = document.getElementById('rouletteResult');
+
+  const rouletteNumbers = 37; // 0-36
+
+  let rouletteSpinning = false;
+  let rouletteAngle = 0;
+
+  function drawRoulette(angle) {
+    const cx = rouletteCanvas.width/2;
+    const cy = rouletteCanvas.height/2;
+    const radius = 120;
+
+    rouletteCtx.clearRect(0, 0, rouletteCanvas.width, rouletteCanvas.height);
+
+    // Desenhar roda
+    for(let i = 0; i < rouletteNumbers; i++) {
+      let startAngle = (i * 2 * Math.PI / rouletteNumbers) + angle;
+      let endAngle = ((i+1) * 2 * Math.PI / rouletteNumbers) + angle;
+
+      rouletteCtx.beginPath();
+      rouletteCtx.moveTo(cx, cy);
+      rouletteCtx.arc(cx, cy, radius, startAngle, endAngle);
+
+      // Cor preta/vermelha ou verde (zero)
+      if(i === 0) rouletteCtx.fillStyle = '#008000';
+      else if(i % 2 === 0) rouletteCtx.fillStyle = '#000000';
+      else rouletteCtx.fillStyle = '#ff0000';
+
+      rouletteCtx.fill();
+      rouletteCtx.strokeStyle = '#333';
+      rouletteCtx.stroke();
+
+      // Número
+      rouletteCtx.save();
+      rouletteCtx.translate(cx, cy);
+      rouletteCtx.rotate((startAngle + endAngle)/2);
+      rouletteCtx.textAlign = 'right';
+      rouletteCtx.fillStyle = '#fff';
+      rouletteCtx.font = 'bold 14px Arial';
+      rouletteCtx.fillText(i, radius - 10, 5);
+      rouletteCtx.restore();
+    }
+
+    // Indicador (seta)
+    rouletteCtx.fillStyle = '#222';
+    rouletteCtx.beginPath();
+    rouletteCtx.moveTo(cx, cy - radius - 15);
+    rouletteCtx.lineTo(cx - 15, cy - radius + 5);
+    rouletteCtx.lineTo(cx + 15, cy - radius + 5);
+    rouletteCtx.closePath();
+    rouletteCtx.fill();
+  }
+
+  btnRoulettePlay.onclick = () => {
+    if(rouletteSpinning) return;
+
+    let bet = parseFloat(rouletteBetInput.value);
+    let chosenNumber = parseInt(rouletteNumberInput.value);
+    if(isNaN(bet) || bet < 1) {
+      alert('Aposta inválida!');
+      return;
+    }
+    if(isNaN(chosenNumber) || chosenNumber < 0 || chosenNumber > 36) {
+      alert('Número inválido! Escolha entre 0 e 36.');
+      return;
+    }
+    if(bet > balance) {
+      alert('Saldo insuficiente!');
+      return;
+    }
+
+    balance -= bet;
+    updateBalance();
+    rouletteResult.textContent = 'Roleta girando...';
+    rouletteSpinning = true;
+
+    let totalSpins = Math.floor(Math.random() * 5) + 8; // entre 8 e 12 voltas
+    let currentSpin = 0;
+    let currentAngle = 0;
+    let deceleration = 0.1;
+
+    function animateSpin() {
+      currentAngle += (0.5 - deceleration);
+      deceleration -= 0.003;
+      if(deceleration < 0) deceleration = 0;
+      drawRoulette(currentAngle);
+
+      if(currentSpin < totalSpins) {
+        if(currentAngle >= 2 * Math.PI) {
+          currentSpin++;
+          currentAngle -= 2 * Math.PI;
+        }
+        requestAnimationFrame(animateSpin);
+      } else {
+        // Número vencedor
+        let finalAngle = currentAngle % (2 * Math.PI);
+        let winnerIndex = Math.floor(rouletteNumbers - (finalAngle / (2 * Math.PI) * rouletteNumbers)) % rouletteNumbers;
+
+        rouletteSpinning = false;
+
+        if(winnerIndex === chosenNumber) {
+          let winAmount = bet * 35;
+          balance += winAmount;
+          updateBalance();
+          rouletteResult.textContent = `Número sorteado: ${winnerIndex}. Você ganhou ${winAmount.toFixed(2)} stoomCoins!`;
+        } else {
+          rouletteResult.textContent = `Número sorteado: ${winnerIndex}. Você perdeu.`;
+        }
+      }
+    }
+    animateSpin();
+  };
+
+  drawRoulette(rouletteAngle);
+
+  /*** JOGO SLOTS ***/
+  const slotsCanvas = document.getElementById('slotsCanvas');
+  const slotsCtx = slotsCanvas.getContext('2d');
+  const slotsBetInput = document.getElementById('slotsBet');
+  const btnSlotsPlay = document.getElementById('btnSlotsPlay');
+  const slotsResult = document.getElementById('slotsResult');
+
+  const slotSymbols = ['🍒', '🍋', '🔔', '🍉', '⭐', '7️⃣'];
+
+  function drawSlots(symbols) {
+    slotsCtx.clearRect(0, 0, slotsCanvas.width, slotsCanvas.height);
+    slotsCtx.font = '60px Arial';
+    slotsCtx.textAlign = 'center';
+    slotsCtx.textBaseline = 'middle';
+
+    const slotWidth = slotsCanvas.width / 3;
+
+    for(let i=0; i < 3; i++) {
+      slotsCtx.fillText(symbols[i], slotWidth * i + slotWidth/2, slotsCanvas.height/2);
+    }
+  }
+
+  btnSlotsPlay.onclick = () => {
+    let bet = parseFloat(slotsBetInput.value);
+    if(isNaN(bet) || bet < 1) {
+      alert('Aposta inválida!');
+      return;
+    }
+    if(bet > balance) {
+      alert('Saldo insuficiente!');
+      return;
+    }
+    balance -= bet;
+    updateBalance();
+
+    slotsResult.textContent = 'Girando...';
+    let spins = 0;
+    let currentSymbols = [0,0,0];
+
+    const spinInterval = setInterval(() => {
+      for(let i=0; i < 3; i++) {
+        currentSymbols[i] = Math.floor(Math.random() * slotSymbols.length);
+      }
+      drawSlots(currentSymbols.map(i => slotSymbols[i]));
+      spins++;
+
+      if(spins > 15) {
+        clearInterval(spinInterval);
+        // Resultado
+        if(currentSymbols[0] === currentSymbols[1] && currentSymbols[1] === currentSymbols[2]) {
+          // Triple match
+          let winAmount = bet * 10;
+          balance += winAmount;
+          updateBalance();
+          slotsResult.textContent = `🎉 Trinca de ${slotSymbols[currentSymbols[0]]}! Você ganhou ${winAmount.toFixed(2)} stoomCoins!`;
+        } else if(currentSymbols[0] === currentSymbols[1] || currentSymbols[1] === currentSymbols[2] || currentSymbols[0] === currentSymbols[2]) {
+          // Dois iguais
+          let winAmount = bet * 2;
+          balance += winAmount;
+          updateBalance();
+          slotsResult.textContent = `✨ Dois símbolos iguais! Você ganhou ${winAmount.toFixed(2)} stoomCoins!`;
+        } else {
+          slotsResult.textContent = 'Você perdeu. Tente de novo!';
+        }
+      }
+    }, 100);
+  };
+
+  // Inicia slots com símbolos aleatórios
+  drawSlots([0,1,2].map(() => slotSymbols[Math.floor(Math.random()*slotSymbols.length)]));
+
+})();
+</script>
+
+</body>
+</html>
